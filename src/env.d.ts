@@ -1,5 +1,5 @@
 interface ImportMetaEnv {
-  readonly PUBLIC_FORMSPREE_ID?: string;
+  readonly PUBLIC_CONTACT_EMAIL?: string;
 }
 
 interface ImportMeta {

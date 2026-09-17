@@ -9,7 +9,9 @@ npm install
 cp .env.example .env
 ```
 
-In `.env`, set `PUBLIC_FORMSPREE_ID` to your [Formspree](https://formspree.io) form id.
+In `.env`, set `PUBLIC_CONTACT_EMAIL` to the inbox that should receive form messages.
+
+The first submit sends a confirmation email from [FormSubmit](https://formsubmit.co). Click that link once; later submissions arrive in the inbox. No backend required.
 
 ## Images
 

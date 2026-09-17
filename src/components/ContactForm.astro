@@ -1,6 +1,8 @@
 ---
-const formId = import.meta.env.PUBLIC_FORMSPREE_ID?.trim();
-const action = formId ? `https://formspree.io/f/${formId}` : "";
+const inbox = import.meta.env.PUBLIC_CONTACT_EMAIL?.trim();
+const action = inbox
+  ? `https://formsubmit.co/ajax/${encodeURIComponent(inbox)}`
+  : "";
 ---
 
 <section class="contact" aria-labelledby="contact-heading">
@@ -13,6 +15,8 @@ const action = formId ? `https://formspree.io/f/${formId}` : "";
     >
       <h2 id="contact-heading" class="cta">Wysyłaj sygnał. Ekipa już czeka.</h2>
       <input type="hidden" name="_subject" value="Sygnał z landing ZGM" />
+      <input type="hidden" name="_template" value="table" />
+      <input type="hidden" name="_captcha" value="false" />
 
       <label>
         <span>Imię</span>
@@ -38,7 +42,7 @@ const action = formId ? `https://formspree.io/f/${formId}` : "";
 
       <div class="submit">
         <p class="rodo">
-          Wysyłając formularz, zgadzasz się na kontakt w sprawie wyceny. Dane nie
+          *Wysyłając formularz, zgadzasz się na kontakt w sprawie wyceny. Dane nie
           są przekazywane dalej.
         </p>
         <button type="submit">Wyślij sygnał</button>
@@ -49,7 +53,7 @@ const action = formId ? `https://formspree.io/f/${formId}` : "";
 
 <style>
   .contact {
-    margin-top: 2.75rem;
+    margin-block: clamp(4rem, 9vw, 7rem);
   }
 
   .cta {
@@ -192,7 +196,7 @@ const action = formId ? `https://formspree.io/f/${formId}` : "";
       if (!configured || !form.action) {
         show(
           "error",
-          "Formularz nie jest jeszcze podłączony. Dodaj PUBLIC_FORMSPREE_ID w pliku .env.",
+          "Formularz nie jest jeszcze podłączony. Dodaj PUBLIC_CONTACT_EMAIL w pliku .env.",
         );
         return;
       }
@@ -201,15 +205,39 @@ const action = formId ? `https://formspree.io/f/${formId}` : "";
       show("ok", "Wysyłanie…");
 
       try {
+        const body = new FormData(form);
+        const visitorEmail = body.get("email");
+        if (typeof visitorEmail === "string" && visitorEmail.trim()) {
+          body.set("_replyto", visitorEmail.trim());
+        }
+
         const response = await fetch(form.action, {
           method: "POST",
-          body: new FormData(form),
+          body,
           headers: { Accept: "application/json" },
         });
+        const payload = (await response.json().catch(() => null)) as {
+          success?: boolean | string;
+          message?: string;
+        } | null;
+        const serverMessage =
+          typeof payload?.message === "string" ? payload.message : "";
+        const needsActivation =
+          /activat|confirm|check your email/i.test(serverMessage);
+        const ok =
+          needsActivation ||
+          (response.ok &&
+            payload != null &&
+            String(payload.success) !== "false");
 
-        if (response.ok) {
-          form.reset();
-          show("ok", "Sygnał wysłany. Oddzwonimy.");
+        if (ok) {
+          if (!needsActivation) form.reset();
+          show(
+            "ok",
+            needsActivation
+              ? "Prawie gotowe. Potwierdź adres w mailu — potem sygnały będą przychodzić na skrzynkę."
+              : "Sygnał wysłany. Oddzwonimy.",
+          );
         } else {
           show("error", "Nie udało się wysłać. Spróbuj jeszcze raz albo zadzwoń.");
         }
