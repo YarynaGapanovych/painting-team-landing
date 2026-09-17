@@ -1,0 +1,223 @@
+---
+const formId = import.meta.env.PUBLIC_FORMSPREE_ID?.trim();
+const action = formId ? `https://formspree.io/f/${formId}` : "";
+---
+
+<section class="contact" aria-labelledby="contact-heading">
+  <div class="panel">
+    <form
+      class="form"
+      method="POST"
+      action={action || undefined}
+      data-configured={action ? "true" : "false"}
+    >
+      <h2 id="contact-heading" class="cta">Wysyłaj sygnał. Ekipa już czeka.</h2>
+      <input type="hidden" name="_subject" value="Sygnał z landing ZGM" />
+
+      <label>
+        <span>Imię</span>
+        <input type="text" name="name" autocomplete="name" required />
+      </label>
+
+      <label>
+        <span>Telefon</span>
+        <input type="tel" name="phone" autocomplete="tel" required />
+      </label>
+
+      <label>
+        <span>Email</span>
+        <input type="email" name="email" autocomplete="email" />
+      </label>
+
+      <label>
+        <span>Wiadomość</span>
+        <textarea name="message" rows="5" required></textarea>
+      </label>
+
+      <p class="status" role="status" aria-live="polite" hidden></p>
+
+      <div class="submit">
+        <p class="rodo">
+          Wysyłając formularz, zgadzasz się na kontakt w sprawie wyceny. Dane nie
+          są przekazywane dalej.
+        </p>
+        <button type="submit">Wyślij sygnał</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<style>
+  .contact {
+    margin-top: 2.75rem;
+  }
+
+  .cta {
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.05rem, 4.2vw, 1.7rem);
+    font-weight: 400;
+    line-height: 1.4;
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  .panel {
+    background: transparent;
+    min-height: 22rem;
+    padding: clamp(1.25rem, 3vw, 2.5rem);
+  }
+
+  .form {
+    display: grid;
+    gap: 1.1rem;
+    max-width: 44rem;
+    margin: 0 auto;
+  }
+
+  label {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  label span {
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+  }
+
+  input,
+  textarea {
+    width: 100%;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    color: #1c1916;
+    caret-color: #1c1916;
+    background-color: rgb(242 240 236 / 0.78);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0.22'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
+    box-shadow:
+      0 4px 12px rgb(0 0 0 / 0.35),
+      0 12px 32px rgb(0 0 0 / 0.25);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: rgb(28 25 22 / 0.45);
+  }
+
+  input:focus,
+  textarea:focus,
+  button:focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: 2px;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 7rem;
+  }
+
+  button {
+    justify-self: center;
+    padding: 0.75rem 1.4rem;
+    border: 1px solid var(--border);
+    background: var(--fg);
+    color: var(--bg);
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: transparent;
+    color: var(--fg);
+  }
+
+  button:disabled {
+    cursor: wait;
+    opacity: 0.7;
+  }
+
+  @media (max-width: 40rem) {
+    .submit button {
+      justify-self: stretch;
+      width: 100%;
+    }
+  }
+
+  .status {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .status[data-kind="ok"] {
+    color: var(--ok);
+  }
+
+  .status[data-kind="error"] {
+    color: var(--danger);
+  }
+
+  .submit {
+    display: grid;
+    justify-items: center;
+    gap: 0.55rem;
+  }
+
+  .rodo {
+    margin: 0;
+    justify-self: stretch;
+    color: var(--muted);
+    font-size: 0.8rem;
+    line-height: 1.45;
+    text-align: left;
+  }
+</style>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>(".form");
+  if (form) {
+    const status = form.querySelector<HTMLParagraphElement>(".status");
+    const submit = form.querySelector<HTMLButtonElement>("button[type='submit']");
+    const configured = form.dataset.configured === "true";
+
+    const show = (kind: "ok" | "error", message: string) => {
+      if (!status) return;
+      status.hidden = false;
+      status.dataset.kind = kind;
+      status.textContent = message;
+    };
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      if (!configured || !form.action) {
+        show(
+          "error",
+          "Formularz nie jest jeszcze podłączony. Dodaj PUBLIC_FORMSPREE_ID w pliku .env.",
+        );
+        return;
+      }
+
+      if (submit) submit.disabled = true;
+      show("ok", "Wysyłanie…");
+
+      try {
+        const response = await fetch(form.action, {
+          method: "POST",
+          body: new FormData(form),
+          headers: { Accept: "application/json" },
+        });
+
+        if (response.ok) {
+          form.reset();
+          show("ok", "Sygnał wysłany. Oddzwonimy.");
+        } else {
+          show("error", "Nie udało się wysłać. Spróbuj jeszcze raz albo zadzwoń.");
+        }
+      } catch {
+        show("error", "Brak połączenia. Sprawdź sieć albo zadzwoń.");
+      } finally {
+        if (submit) submit.disabled = false;
+      }
+    });
+  }
+</script>
