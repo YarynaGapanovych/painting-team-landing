@@ -1,0 +1,32 @@
+---
+---
+
+<header class="site-header">
+  <h1 class="brand">Zorganizowana Grupa Malarska</h1>
+</header>
+
+<style>
+  .site-header {
+    display: flex;
+    justify-content: center;
+    background: var(--bg);
+  }
+
+  .brand {
+    margin: 0;
+    padding: 1.15rem 1rem 1.35rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.35rem, 4.4vw, 3.35rem);
+    font-weight: 700;
+    line-height: 1.15;
+    text-align: center;
+    letter-spacing: 0.01em;
+  }
+
+  @media (max-width: 48rem) {
+    .brand {
+      padding: 0.85rem 0.5rem;
+      font-size: clamp(1.45rem, 6.8vw, 2.2rem);
+    }
+  }
+</style>
