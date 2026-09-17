@@ -1,0 +1,87 @@
+:root {
+  --bg: #000;
+  --fg: #fff;
+  --muted: #d8d8d8;
+  --border: #fff;
+  --photo: #ececec;
+  --danger: #ff6b6b;
+  --ok: #9dffb0;
+  --content: 90rem;
+  --font-display: "UnifrakturCook", "Times New Roman", serif;
+  --font-body: "Libre Baskerville", "Times New Roman", Georgia, serif;
+  --font-stencil: "Allerta Stencil", "Arial Black", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  isolation: isolate;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.5;
+  background: transparent;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(rgb(0 0 0 / 45%), rgb(0 0 0 / 45%)),
+    url("/images/bg.jpg");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+.page {
+  width: min(100% - 2rem, var(--content));
+  margin: 0 auto;
+  padding: 1.5rem 0 5rem;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
